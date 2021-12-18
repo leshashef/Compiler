@@ -1,0 +1,10 @@
+Aslanov 0
+isData 1
+age 2
+name 3
+x 0
+y 1
+hello 0
+a 0
+b 0
+isTrue 0

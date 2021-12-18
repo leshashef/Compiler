@@ -1,0 +1,5 @@
+programma hello;
+int a, b;
+bool isTrue[15+2];
+char x[5], y;
+#
