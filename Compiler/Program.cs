@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace LexicalAnalyzer
 {
-    class LexAnalizer
+    public class LexAnalizer
     {
         private int position = 0;
         FileStream fstream;
@@ -41,7 +41,7 @@ namespace LexicalAnalyzer
                 }
                 else
                 {
-                    Console.WriteLine(str);
+                    //  Console.WriteLine(str);
                 }
 
                 int y;
@@ -79,7 +79,7 @@ namespace LexicalAnalyzer
                             K = 2;
                             bufer = str;
                         }
-                        else if (Regex.IsMatch(str, @"[,.+\-|=/<>&*!{}();]|[""]$"))
+                        else if (Regex.IsMatch(str, @"[,.+\-|=/<>&*!{}();]|\[|\]|[""]$"))
                         {
                             if (str == "/")
                             {
@@ -309,154 +309,457 @@ namespace LexicalAnalyzer
         }
 
         private Queue<Token> Tokens;
+        private Token token;
+        private LexAnalizer LexAnalizer;
+        List<string> strs = new List<string>();
+        int iterator = 0;
+        public SyntaxAnalizer(LexAnalizer lexAnalizer)
+        {
+            LexAnalizer = lexAnalizer;
+            string res;
+            while ((res = LexAnalizer.Lex(true)) != "End" || res == null)
+            {
+                if (res != null)
+                    strs.Add(res);
+            }
+            strs.Add("End");
+        }
+        public void nextToken(bool next)
+        {
+            string token = strs[iterator];
+            if (token == "End")
+            {
+                this.token = new Token()
+                {
+                    pointer = '#',
+                    num = 0
+                };
+                return;
+            }
+            if (next)
+            {
+                iterator++;
+            }
+            this.token = new Token()
+            {
+                pointer = token[0],
+                num = int.Parse(token.Substring(1))
+            };
+        }
         public SyntaxAnalizer(List<string> tokens)
         {
             Tokens = new Queue<Token>();
             foreach (var token in tokens)
             {
-                //Token T = new Token();
-                //T.pointer = token[0];
-                //int.TryParse(token.Substring(1,1), out T.num);
                 Tokens.Enqueue(new Token()
                 {
                     pointer = token[0],
                     num = int.Parse(token.Substring(1))
                 });
-                // Tokens.Add(T);
             }
         }
 
         public bool CheckMathOperation()
         {
-            return Z();
-        }
-        bool Z()
-        {
-            if (Tokens.Count == 0)
-            {
-                return false;
-            }
-            Token token = Tokens.Peek();
-            bool result = true;
-            while (result && Tokens.Count > 0)
-            {
-                 token = Tokens.Peek();
-                if (token.pointer == 'N' || token.pointer == 'V')
-                {
-                    Tokens.Dequeue();
-                    result = E();
-                }
-                else if (token.pointer == 'S' && token.num == 16)
-                {
-                    Tokens.Dequeue();
-                    result = L();
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-
-            return result;
-        }
-        bool L()
-        {
-            if (Tokens.Count == 0)
-            {
-                return false;
-            }
-            Token token = Tokens.Peek();
-            bool result = true;
-            if (token.pointer == 'S' && token.num == 17)
-            {
-                return false;
-            }
-            while (result && Tokens.Count > 0 && !(token.pointer == 'S' && token.num == 17) )
-            {
-                
-                token = Tokens.Peek();
-                if (token.pointer == 'N' || token.pointer == 'V')
-                {
-                    Tokens.Dequeue();
-                    result = E();
-                }
-                else if (token.pointer == 'S' && token.num == 16)
-                {
-                    Tokens.Dequeue();
-                    result = L();
-                }
-                else if(token.pointer == 'S' && token.num == 17)
-                {
-                    Tokens.Dequeue();
-                     break;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            if(Tokens.Count == 0 && token.pointer == 'S' && token.num == 17)
-            {
-                return true;
-            }
-            else if(Tokens.Count == 0 && !(token.pointer == 'S' && token.num == 17))
-            {
-                return false;
-            }
-            else if(Tokens.Count > 0 && token.pointer == 'S' && token.num == 17)
-            {
-                result = E();
-            }
-            return result;
-        }
-        bool E()
-        {
-            if (Tokens.Count == 0)
-            {
-                return true;
-            }
-            Token token = Tokens.Peek();
-            bool result;
-            if (token.pointer == 'S' && (token.num == 6 || token.num == 7))
-            {
-                Tokens.Dequeue();
-                result = true;
-            }
-            else if (token.pointer == 'S' && (token.num == 1 || token.num == 2))
-            {
-                Tokens.Dequeue();
-                result = true;
-            }
-            else if (token.pointer == 'S' && token.num == 17)
-            {
-                return true;
-            }
-            else
-            { 
-                return false; 
-            }
-            return result;
-        }
-
-        public bool LogicalAnaliz()
-        {
-            return A();
-        }
-
-        private bool A()
-        {
-            if (Tokens.Count == 0)
-            {
-                return false;
-            }
-            Token token = Tokens.Peek();
-            bool result = true;
-
-           if(15 > 2 && 12 < 1)
+            E();
             return true;
         }
 
+        //Арифметика
+        void E()
+        {
+            T();
+            nextToken(false);
+
+            while (!((token.pointer == 'S' && token.num == 17) || token.pointer == '#'))
+            {
+                nextToken(false);
+                if (token.pointer == 'S' && token.num == 6)
+                {//+
+                    nextToken(true);
+
+                    T();
+                }
+                else if (token.pointer == 'S' && token.num == 7)
+                {//-
+                    nextToken(true);
+
+                    T();
+                }
+                else
+                {
+                    Console.WriteLine("Error E1");
+                    return;
+                }
+                nextToken(false);
+
+            }
+        }
+
+        void T()
+        {
+            F();
+            nextToken(false);
+
+            while (!(token.pointer == '#' || (token.pointer == 'S' && token.num == 17) || (token.pointer == 'S' && token.num == 6) || (token.pointer == 'S' && token.num == 7)))
+            {
+                nextToken(false);
+
+                if (token.pointer == 'S' && token.num == 1)
+                {//*
+                    nextToken(true);
+
+                    F();
+                }
+                else if (token.pointer == 'S' && token.num == 2)
+                {//
+                    nextToken(true);
+
+                    F();
+                }
+                else
+                {
+                    Console.WriteLine("Error T1");
+                    return;
+                }
+                nextToken(false);
+
+            }
+        }
+
+        void F()
+        {
+            nextToken(false);
+
+            if (token.pointer == 'N')
+            {
+                nextToken(true);
+
+            }
+            else if (token.pointer == 'V')
+            {
+                nextToken(true);
+
+            }
+            else if (token.pointer == 'S' && token.num == 16)
+            {
+                nextToken(true);
+
+                E();
+                nextToken(true);
+
+                if (token.pointer == 'S' && token.num == 17) { }
+                else
+                {
+                    Console.WriteLine("Error F1");
+                    return;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error F2");
+                return;
+            }
+        }
+
+        //Логика
+        void EL()
+        {
+            TL();
+            nextToken(false);
+
+            while (!((token.pointer == 'S' && token.num == 17) || token.pointer == '#' || (token.pointer == 'S' && token.num == 8 || token.num == 9) || (token.pointer == 'D' && token.num == 0 || token.num == 12) || (token.pointer == 'S' && token.num == 20)))
+            {
+                nextToken(false);
+                if (token.pointer == 'S' && token.num == 6)
+                {//+
+                    nextToken(true);
+
+                    TL();
+                }
+                else if (token.pointer == 'S' && token.num == 7)
+                {//-
+                    nextToken(true);
+
+                    TL();
+                }
+                else
+                {
+                    Console.WriteLine("Error E1");
+                    return;
+                }
+                nextToken(false);
+
+            }
+        }
+        void TL()
+        {
+            FL();
+            nextToken(false);
+
+            while (!(token.pointer == '#' || (token.pointer == 'S' && token.num == 17) || (token.pointer == 'S' && token.num == 6) || (token.pointer == 'S' && token.num == 7) || (token.pointer == 'S' && token.num == 8 || token.num == 9) || (token.pointer == 'D' && token.num == 0 || token.num == 12) || (token.pointer == 'S' && token.num == 20)))
+            {
+                nextToken(false);
+
+                if (token.pointer == 'S' && token.num == 1)
+                {//*
+                    nextToken(true);
+
+                    FL();
+                }
+                else if (token.pointer == 'S' && token.num == 2)
+                {//
+                    nextToken(true);
+
+                    FL();
+                }
+                else
+                {
+                    Console.WriteLine("Error T1");
+                    return;
+                }
+                nextToken(false);
+
+            }
+        }
+        void FL()
+        {
+            nextToken(false);
+
+            if (token.pointer == 'N')
+            {
+                nextToken(true);
+
+            }
+            else if (token.pointer == 'V')
+            {
+                nextToken(true);
+
+            }
+            else if (token.pointer == 'S' && token.num == 16)
+            {
+                nextToken(true);
+
+                EL();
+                nextToken(true);
+
+                if (token.pointer == 'S' && token.num == 17) { }
+                else
+                {
+                    Console.WriteLine("Error F1");
+                    return;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error F2");
+                return;
+            }
+        }
+        public void Z()
+        {
+            A();
+            nextToken(false);
+
+            while (!((token.pointer == 'S' && token.num == 17) || token.pointer == '#'))
+            {
+                nextToken(false);
+                if (token.pointer == 'D' && token.num == 14)
+                {//&&
+                    nextToken(true);
+
+                    A();
+                }
+                else if (token.pointer == 'D' && token.num == 13)
+                {//||
+                    nextToken(true);
+
+                    A();
+                }
+                else
+                {
+                    Console.WriteLine("Error Z1");
+                    return;
+                }
+                nextToken(false);
+
+            }
+        }
+        public void A()
+        {
+            nextToken(false);
+
+            if (token.pointer != '#')
+            {
+                if (token.pointer == 'S' && token.num == 16)// (
+                {
+                    nextToken(true);
+                    Z();
+                    nextToken(true);
+                    if (token.pointer == 'S' && token.num == 17) { } // )
+                    else
+                    {
+                        Console.WriteLine("error not )");
+                    }
+                }
+                else if (token.pointer == 'K' && (token.num == 24 || token.num == 25))
+                {
+                    nextToken(true);
+                }
+                else if (token.pointer == 'V')
+                {
+                    nextToken(true);
+                }
+                else if (token.pointer == 'S' && token.num == 19)
+                {
+                    nextToken(true);
+                    C();
+
+                    if (token.pointer == 'S' && token.num == 20)
+                    {
+                        nextToken(true);
+                    }
+                    else
+                    {
+                        Console.WriteLine("error not ]");
+                    }
+                }
+                else if (token.pointer == 'S' && token.num == 18)//!
+                {
+                    nextToken(true);
+                    A();
+                }
+                else
+                {
+                    Console.WriteLine("Error Type A1");
+                }
+
+            }
+        }
+        public void C()
+        {
+            EL();
+
+
+            if ((token.pointer == 'S' && (token.num == 8 || token.num == 9)) || (token.pointer == 'D' && (token.num == 0 || token.num == 12)))
+            {
+                nextToken(true);
+            }
+            else
+            {
+                Console.WriteLine("Error C1 not <>");
+            }
+            EL();
+
+        }
+
+        //Скелет
+        public void S()
+        {
+            SP();
+            nextToken(false);
+
+        }
+        void SP()
+        {
+            nextToken(false);
+            if(token.pointer == 'K' && token.num == 27)
+            {
+                nextToken(true);
+            }
+            else
+            {
+                Console.WriteLine("Отсутствует блок Programm");
+                return;
+            }
+            nextToken(false);
+            if(token.pointer == 'V')
+            {
+                nextToken(true);
+            }
+            else
+            {
+                Console.WriteLine("Отсутствует название программы");
+                return;
+            }
+            nextToken(false);
+            if (token.pointer == 'S' && token.num == 14)
+            {
+                nextToken(true);
+            }
+            else
+            {
+                Console.WriteLine("Error end line ;");
+                return;
+            }
+
+            SD();
+        }
+        void SD()
+        {
+            nextToken(false);
+
+            while(!(token.pointer == 'K' && token.num == 28) && !(token.pointer == '#'))
+            {
+                nextToken(false);
+                if(token.pointer == 'K' && (token.num == 8 || token.num == 15 || token.num == 3))
+                {
+                    nextToken(true);
+                    ST();
+                }
+                else if(token.pointer == 'S' && token.num == 14)
+                {
+                    Console.WriteLine("Error SD ;");
+                }
+            }
+        }
+        void ST()
+        {
+            nextToken(false);
+
+            while(!(token.pointer == 'S' && token.num == 14))
+            {
+                nextToken(false);
+                if (token.pointer == 'V')
+                {
+                    nextToken(true);
+                    SM();
+                    nextToken(false);
+                    if(token.pointer == 'S' && token.num == 5)
+                    {
+                        nextToken(true);
+                    }
+                    else if(token.pointer == 'S' && token.num == 14)
+                    {
+                        nextToken(true);
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error not , or ;");
+                    }
+                }
+            }
+        }
+        void SM()
+        {
+            nextToken(false);
+            if(token.pointer == 'S' && token.num == 19)
+            {
+                nextToken(true);
+                EL();
+                if(token.pointer == 'S' && token.num == 20) 
+                {
+                    nextToken(true);
+                }
+                else
+                {
+                    Console.WriteLine("Error SM ]");
+                }
+            }
+        }
+
+        //Блок операторов и присвоения
         public void show()
         {
             foreach (var token in Tokens)
@@ -470,21 +773,41 @@ namespace LexicalAnalyzer
         static void Main(string[] args)
         {
             LexAnalizer lex = new LexAnalizer("readFile.txt");
-            List<string> codeResult = new List<string>();
+            //List<string> codeResult = new List<string>();
             string res;
-            while ((res = lex.Lex(true)) != "End" || res == null)
-            {
-                if (res != null)
-                    codeResult.Add(res);
-            }
-            foreach (var code in codeResult)
-            {
-                Console.WriteLine(code);
-            }
-            SyntaxAnalizer syntax = new SyntaxAnalizer(codeResult);
-            syntax.show();
-            Console.WriteLine(syntax.CheckMathOperation());
+            //while ((res = lex.Lex(true)) != "End" || res == null)
+            //{
+            //    if (res != null)
+            //        codeResult.Add(res);
+            //}
+            //foreach (var code in codeResult)
+            //{
+            //    Console.WriteLine(code);
+            //}
+            //bool next = false;
+            //string a;
+            //while ((res = lex.Lex(next)) != "End" || res == null)
+            //{
 
+            //    if (res != null)
+            //        Console.WriteLine(res);
+            //    a = Console.ReadLine();
+            //    if (a == "1")
+            //    {
+            //        next = true;
+            //    }
+            //    else if (a == "0")
+            //    {
+            //        next = false;
+            //    }
+            //}
+
+
+            SyntaxAnalizer syntax = new SyntaxAnalizer(lex);
+            // syntax.show();
+            // Console.WriteLine(syntax.CheckMathOperation());
+
+            syntax.S();
             Console.ReadKey();
 
         }
