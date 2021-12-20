@@ -27,3 +27,9 @@ false 25
 string 26
 programma 27
 start 28
+end 29
+goWrite 30
+goRead 31
+if 32
+endif 33
+endwhile 34

@@ -1,5 +1,12 @@
-programma hello;
-int a, b;
-bool isTrue[15+2];
-char x[5], y;
+start
+	x = 12;
+	while(true)
+		while(x)
+			x = x - 1;
+			if([x>2])
+
+			endif
+		endwhile
+	endwhile
+end
 #

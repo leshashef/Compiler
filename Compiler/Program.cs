@@ -371,7 +371,7 @@ namespace LexicalAnalyzer
             T();
             nextToken(false);
 
-            while (!((token.pointer == 'S' && token.num == 17) || token.pointer == '#'))
+            while (!((token.pointer == 'S' && token.num == 17) || token.pointer == '#' || (token.pointer == 'S' && token.num == 14)))
             {
                 nextToken(false);
                 if (token.pointer == 'S' && token.num == 6)
@@ -401,7 +401,7 @@ namespace LexicalAnalyzer
             F();
             nextToken(false);
 
-            while (!(token.pointer == '#' || (token.pointer == 'S' && token.num == 17) || (token.pointer == 'S' && token.num == 6) || (token.pointer == 'S' && token.num == 7)))
+            while (!(token.pointer == '#' || (token.pointer == 'S' && token.num == 17) || (token.pointer == 'S' && token.num == 6) || (token.pointer == 'S' && token.num == 7) || (token.pointer == 'S' && token.num == 14)))
             {
                 nextToken(false);
 
@@ -760,6 +760,271 @@ namespace LexicalAnalyzer
         }
 
         //Блок операторов и присвоения
+        void BWAP()
+        {
+            //вызов определения переменных и вызов определение блока операторов и присвоения 
+        }
+
+       public void BOIP()
+        {
+            nextToken(false);
+
+            if(token.pointer == 'K' && token.num == 28)//start
+            {
+                nextToken(true);
+                BP();
+                nextToken(true);
+                if(token.pointer == 'K' && token.num == 29)//end
+                {
+
+                }
+                else
+                {
+                    Console.WriteLine("Отсутствует ключевое слово End");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Отсутствует ключевое слово Start");
+            }
+        }
+        void BP()
+        {
+            nextToken(false);
+
+            while (!(token.pointer == 'K' && token.num == 29) && (token.pointer != '#'))//end
+            {
+                nextToken(false);
+                if(token.pointer == 'V')//переменная
+                {
+                    nextToken(true);
+                    BV();
+                    nextToken(false);
+                    if (token.pointer == 'S' && token.num == 14)
+                    {
+                        nextToken(true);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ошибка отсутствует ;");
+                    }
+                }
+                else if(token.pointer == 'K' && token.num == 32) // if
+                {
+                    nextToken(true);
+                    BIF();
+                    nextToken(false);
+                    if(token.pointer == 'K' && token.num == 33) { nextToken(true); }
+                    else
+                    {
+                        Console.WriteLine("error endif not found");
+                    }
+                }
+                else if(token.pointer == 'K' && token.num == 22)// while
+                {
+                    nextToken(true);
+                    BWhile();
+                    nextToken(false);
+                    if (token.pointer == 'K' && token.num == 34) { nextToken(true); }
+                    else
+                    {
+                        Console.WriteLine("error endwhile not found");
+                    }
+                }
+                else if(token.pointer == 'K' && token.num == 30)//goWrite
+                {
+
+                }
+                else if(token.pointer == 'K' && token.num == 31)//goRead
+                {
+
+                }
+                else
+                {
+                    Console.WriteLine("error не известный ключ");
+                    return;
+                }
+                nextToken(false);
+            }
+        }
+
+
+        //блок if
+        void BIF()
+        {
+            nextToken(false);
+            if(token.pointer == 'S' && token.num == 16)
+            {
+                nextToken(true);
+                Z();
+                nextToken(false);
+                if(token.pointer == 'S' && token.num == 17)
+                {
+                    nextToken(true);
+                    BOIF();
+             
+                }
+            }
+            else
+            {
+                Console.WriteLine("error ( not found");
+            }
+        }
+       void BOIF()
+        {
+            nextToken(false);
+            while(!(token.pointer == 'K' && token.num == 33) && token.pointer != '#')
+            {
+                nextToken(false);
+                if (token.pointer == 'V')//переменная
+                {
+                    nextToken(true);
+                    BV();
+                    nextToken(false);
+                    if (token.pointer == 'S' && token.num == 14)
+                    {
+                        nextToken(true);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ошибка отсутствует ;");
+                    }
+                }
+                else if (token.pointer == 'K' && token.num == 32) // if
+                {
+                    nextToken(true);
+                    BIF();
+                    nextToken(false);
+                    if (token.pointer == 'K' && token.num == 33) { nextToken(true); }
+                    else
+                    {
+                        Console.WriteLine("error endif not found");
+                    }
+                }
+                else if (token.pointer == 'K' && token.num == 22)// while
+                {
+                    nextToken(true);
+                    BWhile();
+                    nextToken(false);
+                    if (token.pointer == 'K' && token.num == 34) { nextToken(true); }
+                    else
+                    {
+                        Console.WriteLine("error endwhile not found");
+                    }
+                }
+                else if (token.pointer == 'K' && token.num == 30)//goWrite
+                {
+
+                }
+                else if (token.pointer == 'K' && token.num == 31)//goRead
+                {
+
+                }
+                else
+                {
+                    Console.WriteLine("error не известный ключ");
+                    return;
+                }
+                nextToken(false);
+            }
+        }
+
+        //блок while
+        void BWhile()
+        {
+            nextToken(false);
+            if (token.pointer == 'S' && token.num == 16)
+            {
+                nextToken(true);
+                Z();
+                nextToken(false);
+                if (token.pointer == 'S' && token.num == 17)
+                {
+                    nextToken(true);
+                    BOWhile();
+
+                }
+            }
+            else
+            {
+                Console.WriteLine("error ( not found");
+            }
+        }
+
+        void BOWhile()
+        {
+            nextToken(false);
+            while (!(token.pointer == 'K' && token.num == 34) && token.pointer != '#')
+            {
+                nextToken(false);
+                if (token.pointer == 'V')//переменная
+                {
+                    nextToken(true);
+                    BV();
+                    nextToken(false);
+                    if (token.pointer == 'S' && token.num == 14)
+                    {
+                        nextToken(true);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ошибка отсутствует ;");
+                    }
+                }
+                else if (token.pointer == 'K' && token.num == 32) // if
+                {
+                    nextToken(true);
+                    BIF();
+                    nextToken(false);
+                    if (token.pointer == 'K' && token.num == 33) { nextToken(true); }
+                    else
+                    {
+                        Console.WriteLine("error endif not found");
+                    }
+                }
+                else if (token.pointer == 'K' && token.num == 22)// while
+                {
+                    nextToken(true);
+                    BWhile();
+                    nextToken(false);
+                    if (token.pointer == 'K' && token.num == 34) { nextToken(true); }
+                    else
+                    {
+                        Console.WriteLine("error endwhile not found");
+                    }
+                }
+                else if (token.pointer == 'K' && token.num == 30)//goWrite
+                {
+
+                }
+                else if (token.pointer == 'K' && token.num == 31)//goRead
+                {
+
+                }
+                else
+                {
+                    Console.WriteLine("error не известный ключ");
+                    return;
+                }
+                nextToken(false);
+            }
+        }
+
+        //блок переменных
+        void BV()
+        {
+            nextToken(false);
+            if (token.pointer == 'S' && token.num == 3)
+            {
+                nextToken(true);
+                E();
+                nextToken(false);
+            }
+            else
+            {
+                Console.WriteLine("Ошибка блока присваивания =");
+            }
+        }
         public void show()
         {
             foreach (var token in Tokens)
@@ -807,7 +1072,7 @@ namespace LexicalAnalyzer
             // syntax.show();
             // Console.WriteLine(syntax.CheckMathOperation());
 
-            syntax.S();
+            syntax.BOIP();
             Console.ReadKey();
 
         }
