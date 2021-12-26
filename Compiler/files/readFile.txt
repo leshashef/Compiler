@@ -1,4 +1,9 @@
+programma helloWorld;
+int x, y[2];
+char bigChar;
+bool isTrue;
 start
+	goRead >> x;
 	x = 12;
 	while(true)
 		while(x)
@@ -8,5 +13,6 @@ start
 			endif
 		endwhile
 	endwhile
+	goWrite << x << true;
 end
 #

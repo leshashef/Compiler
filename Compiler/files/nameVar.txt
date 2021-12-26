@@ -10,3 +10,7 @@ b 0
 isTrue 0
 endif 0
 endwhile 0
+d 0
+programm 0
+helloWorld 1
+bigChar 2
